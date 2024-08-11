@@ -1,8 +1,3 @@
-# File path: stock_trend_prediction_app.py
-
-# Install required packages if not already installed
-# Uncomment the next line to install required packages
-# !pip install streamlit yfinance prophet plotly
 
 import streamlit as st
 import yfinance as yf
@@ -11,14 +6,14 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-# Function to fetch stock data
+#Fetch stock data
 def fetch_stock_data(ticker, start, end):
     stock_data = yf.download(ticker, start=start, end=end)
     stock_data = stock_data[['Close']].reset_index()
     stock_data.dropna(inplace=True)  # Remove any missing values
     return stock_data
 
-# Function to make predictions
+#Make predictions
 def predict_stock_trends(data, periods=30):
     df = data[['Date', 'Close']]
     df.columns = ['ds', 'y']
@@ -32,12 +27,7 @@ def predict_stock_trends(data, periods=30):
     model.fit(df)
     
     # Create a future dataframe
-    future = model.make_future_dataframe(periods=periods)
-    
-    # Remove weekends and non-trading days from the future dataframe
-    future['day_of_week'] = future['ds'].dt.dayofweek
-    future = future[future['day_of_week'] < 5]  # Keep only weekdays (0=Monday, 4=Friday)
-    future.drop(columns=['day_of_week'], inplace=True)
+    future = model.make_future_dataframe(periods=periods, freq='B')  # freq='B' ensures only business days are included
     
     forecast = model.predict(future)
     
@@ -48,7 +38,7 @@ def predict_stock_trends(data, periods=30):
     
     return forecast, model
 
-# Build the Streamlit app layout
+#Streamlit app layout
 def main():
     st.set_page_config(page_title="Stock Trend Prediction", layout="wide")
     
